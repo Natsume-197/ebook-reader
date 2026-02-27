@@ -312,6 +312,34 @@
     }
   }
 
+  // Nanahoshi integration: accept books via postMessage from parent window
+  if (typeof window !== 'undefined') {
+    const handleParentMessage = async (event: MessageEvent) => {
+      if (event.data?.book instanceof File) {
+        try {
+          await onFilesChange([event.data.book]);
+          const bookData = await database.getDataByTitle(
+            event.data.book.name.replace(/\.[^.]+$/, '')
+          );
+          if (bookData && window.parent !== window) {
+            window.parent.postMessage(
+              {
+                action: 'bookLoaded',
+                ttuBookId: bookData.id,
+                nanahoshiId: event.data.nanahoshiId
+              },
+              '*'
+            );
+          }
+        } catch (err) {
+          console.error('Nanahoshi import error:', err);
+        }
+      }
+    };
+    window.addEventListener('message', handleParentMessage);
+    onDestroy(() => window.removeEventListener('message', handleParentMessage));
+  }
+
   function showError(title: string, message: string, fallbackMessage: string) {
     const showReport = logger.errorCount > 1;
 
