@@ -1422,7 +1422,11 @@
       ]);
     }
 
-    goto(`${pagePath}${routeId}`);
+    if (window.parent !== window && routeId === mergeEntries.MANAGE.routeId) {
+      window.parent.postMessage({ action: 'exitReader' }, '*');
+    } else {
+      goto(`${pagePath}${routeId}`);
+    }
   }
 
   function handleSetCustomReadingPoint() {

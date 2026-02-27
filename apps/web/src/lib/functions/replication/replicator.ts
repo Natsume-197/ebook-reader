@@ -134,7 +134,7 @@ export async function importData(
     });
   }
 
-  return errorMessage;
+  return { error: errorMessage, dataIds };
 }
 
 export async function importBackup(

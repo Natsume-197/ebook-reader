@@ -70,7 +70,7 @@
     hideSpoilerImageMode$
   } from '$lib/data/store';
   import { mergeEntries } from '$lib/components/merged-header-icon/merged-entries';
-  import { pagePath } from '$lib/data/env';
+  import { base } from '$app/paths';
   import { storage } from '$lib/data/window/navigator/storage';
   import { formatPageTitle } from '$lib/functions/format-page-title';
   import { writableSubject } from '$lib/functions/svelte/store';
@@ -85,7 +85,7 @@
     setStorageQuota();
   });
 
-  let prevPage = `${pagePath}${mergeEntries.MANAGE.routeId}`;
+  let prevPage = `${base}${mergeEntries.MANAGE.routeId}`;
 
   let activeSettings = 'Reader';
 

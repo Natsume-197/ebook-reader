@@ -6,7 +6,7 @@
   import { mergeEntries } from '$lib/components/merged-header-icon/merged-entries';
   import Popover from '$lib/components/popover/popover.svelte';
   import { baseIconClasses } from '$lib/css-classes';
-  import { pagePath } from '$lib/data/env';
+  import { base } from '$app/paths';
   import { dummyFn } from '$lib/functions/utils';
 
   export let leavePageLink = '';
@@ -33,13 +33,13 @@
       const action = actionItems.find((item) => item.label === target);
 
       if (action?.routeId) {
-        goto(`${pagePath}${action.routeId}`);
+        goto(`${base}${action.routeId}`);
       }
     }
   }
 
   if (actionItems.length === 1 && actionItems[0].routeId) {
-    leavePageLink = actionItems[0].routeId;
+    leavePageLink = `${base}${actionItems[0].routeId}`;
   }
 </script>
 

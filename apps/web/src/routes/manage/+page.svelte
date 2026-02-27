@@ -288,7 +288,7 @@
       return;
     }
 
-    const error = await importData(
+    const result = await importData(
       document,
       getStorageHandler(
         window,
@@ -303,29 +303,28 @@
       files,
       cancelSignal,
       $fileCountData$
-    ).catch((catchedError) => catchedError.message);
+    ).catch((catchedError) => ({ error: catchedError.message, dataIds: [] as number[] }));
 
     resetProgress();
 
-    if (error) {
-      showError(errorTitle, error, 'Error(s) occurred during bookimport');
+    if (result.error) {
+      showError(errorTitle, result.error, 'Error(s) occurred during bookimport');
     }
+
+    return result.dataIds;
   }
 
   // Nanahoshi integration: accept books via postMessage from parent window
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && window.parent !== window) {
     const handleParentMessage = async (event: MessageEvent) => {
       if (event.data?.book instanceof File) {
         try {
-          await onFilesChange([event.data.book]);
-          const bookData = await database.getDataByTitle(
-            event.data.book.name.replace(/\.[^.]+$/, '')
-          );
-          if (bookData && window.parent !== window) {
+          const dataIds = await onFilesChange([event.data.book]);
+          if (dataIds?.length) {
             window.parent.postMessage(
               {
                 action: 'bookLoaded',
-                ttuBookId: bookData.id,
+                ttuBookId: dataIds[0],
                 nanahoshiId: event.data.nanahoshiId
               },
               '*'
@@ -338,6 +337,9 @@
     };
     window.addEventListener('message', handleParentMessage);
     onDestroy(() => window.removeEventListener('message', handleParentMessage));
+
+    // Signal to parent that the connector is ready to receive books
+    window.parent.postMessage({ action: 'connectorReady' }, '*');
   }
 
   function showError(title: string, message: string, fallbackMessage: string) {
